@@ -15,3 +15,6 @@ recovery/apk-analysis/*.log
 recovery/apk-analysis/*.dex.classes.txt
 recovery/apk-analysis/*.dex.strings.txt
 recovery/apk-analysis/archive-files.json
+
+# Install packages are delivered locally, not stored in source history.
+apk/*.apk

@@ -1,5 +1,7 @@
 # 轻记 Qingji
 
+当前维护版本 **0.3.3**：修复支付金额误识别与屏幕旋转丢失输入。本地安装包位于 `apk/`，见 [安装说明](apk/README.md)；本轮结果见 [稳定性验证](docs/stability-0.3.3-status.md)。
+
 从用户提供的轻记 0.3.2 APK 重建的原生 Android 项目。源码在本目录 `app/` 中，可用 Android Studio 打开项目根目录。这里是依据字节码重新整理的 Kotlin 工程，不能视作逐字恢复的原始 Git 源码。
 
 ## 文件

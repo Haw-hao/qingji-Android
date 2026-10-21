@@ -11,7 +11,9 @@ data class ParsedPaymentNotification(
     val originalText: String,
 )
 
-private val amountPattern = Regex("(?:¥|￥|RMB)\\s*([0-9]+(?:[.,][0-9]{1,2})?)", RegexOption.IGNORE_CASE)
+private val amountPattern = Regex("(?:¥|￥|RMB)\\s*([+-]?[0-9][0-9.,]*(?:[eE][+-]?[0-9]+)?)", RegexOption.IGNORE_CASE)
+private val groupedAmountPattern = Regex("[0-9]{1,3}(?:,[0-9]{3})+(?:\\.[0-9]{1,2})?")
+private val decimalAmountPattern = Regex("[0-9]+(?:[.,][0-9]{1,2})?")
 private val incomeWords = listOf("收款", "到账", "收入", "转入")
 
 // Control flow cross-checked with payment-simple.java (linear DEX decompilation).
@@ -24,8 +26,14 @@ fun parsePaymentNotification(packageName: String, title: String, text: String): 
             .any { combined.contains(it) } -> "支付宝"
         else -> return null
     }
-    val amount = amountPattern.find(combined)?.groupValues?.getOrNull(1)
-        ?.replace(",", ".")?.toDoubleOrNull() ?: return null
+    // A final comma separates the merchant; internal commas must match a valid numeric format.
+    val rawAmount = amountPattern.find(combined)?.groupValues?.getOrNull(1)?.removeSuffix(",") ?: return null
+    val normalizedAmount = when {
+        groupedAmountPattern.matches(rawAmount) -> rawAmount.replace(",", "")
+        decimalAmountPattern.matches(rawAmount) -> rawAmount.replace(",", ".")
+        else -> return null
+    }
+    val amount = normalizedAmount.toDoubleOrNull()?.takeIf { it.isFinite() && it > 0 } ?: return null
     val income = incomeWords.any { combined.contains(it) }
     val merchant = extractMerchant(text, amountPattern.find(text)?.range?.last ?: -1)
     return ParsedPaymentNotification(amount, income, method, merchant, inferCategory(merchant, income), text.trim())

@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -22,8 +23,8 @@ import ink.qingji.app.data.*
 internal fun ProfilePage(accounts: List<Account>, txs: List<Transaction>, prefs: SharedPreferences,
                          onAddAccount: (String, Double) -> Unit) {
     val context = LocalContext.current
-    var name by remember { mutableStateOf("") }
-    var initialBalance by remember { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var initialBalance by rememberSaveable { mutableStateOf("") }
     var notificationMode by remember { mutableStateOf(prefs.getString("notification_mode", "remind") ?: "remind") }
     val balances = calculateAccountBalances(accounts, txs)
     val numericBalance = if (initialBalance.isBlank()) 0.0 else initialBalance.toDoubleOrNull()

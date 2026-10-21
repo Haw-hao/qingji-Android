@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -28,11 +29,11 @@ internal fun money(value: Double): String = String.format(Locale.CHINA, "%.2f", 
 
 @Composable
 fun QingjiApp(db: TransactionDb, prefs: SharedPreferences) {
-    var tab by remember { mutableIntStateOf(0) }
+    var tab by rememberSaveable { mutableIntStateOf(0) }
     var txs by remember { mutableStateOf(db.list()) }
     var accounts by remember { mutableStateOf(db.accounts()) }
     var categories by remember { mutableStateOf(prefs.getStringSet("custom_categories", emptySet()).orEmpty().toList()) }
-    var filter by remember { mutableStateOf<String?>(null) }
+    var filter by rememberSaveable { mutableStateOf<String?>(null) }
     val lifecycleOwner = LocalLifecycleOwner.current
     fun refresh() { txs = db.list(); accounts = db.accounts() }
     DisposableEffect(lifecycleOwner, db) {

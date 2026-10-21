@@ -63,4 +63,25 @@ class RecoveryBehaviorTest {
         assertEquals("2026-09-08", transactionDate(now))
         assertEquals("09:04", transactionTime(now))
     }
+
+    @Test fun groupedPaymentAmountsAreNotTruncated() {
+        for ((text, expected) in listOf("付款￥1,234.56 付款给商店" to 1234.56,
+            "付款￥1,234 付款给商店" to 1234.0, "付款￥12,345,678.90" to 12345678.9,
+            "付款￥1,234,567" to 1234567.0, "付款￥12,345,678" to 12345678.0)) {
+            val result = parsePaymentNotification("com.tencent.mm", "微信支付", text)!!
+            assertEquals(text, expected, result.amount, 0.001)
+        }
+    }
+
+    @Test fun invalidPaymentAmountsAreIgnoredInsteadOfPartiallyParsed() {
+        for (amount in listOf("0", "0.00", "12.345", "1,23,456", "1,234.5.6", "1.234,56", "12.", "-12", "9".repeat(400))) {
+            assertNull(amount, parsePaymentNotification("com.tencent.mm", "微信支付", "付款￥$amount 付款给商店"))
+        }
+    }
+
+    @Test fun commaSeparatingMerchantIsNotPartOfAmount() {
+        val result = parsePaymentNotification("com.tencent.mm", "微信支付", "付款￥19.50,付款给奶茶店")!!
+        assertEquals(19.5, result.amount, 0.001)
+        assertEquals("奶茶店", result.merchant)
+    }
 }

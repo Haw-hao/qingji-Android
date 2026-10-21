@@ -7,6 +7,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -19,12 +20,12 @@ import java.time.LocalDateTime
 @Composable
 internal fun AddPage(accounts: List<Account>, customCategories: List<String>,
                      onUpdateCategories: (List<String>) -> Unit, onSave: (Transaction) -> Unit) {
-    var amount by remember { mutableStateOf("") }
-    var merchant by remember { mutableStateOf("") }
-    var income by remember { mutableStateOf(false) }
-    var category by remember { mutableStateOf("其他") }
-    var categoryPage by remember { mutableStateOf(false) }
-    var selectedAccountId by remember { mutableStateOf(accounts.firstOrNull()?.id ?: 0L) }
+    var amount by rememberSaveable { mutableStateOf("") }
+    var merchant by rememberSaveable { mutableStateOf("") }
+    var income by rememberSaveable { mutableStateOf(false) }
+    var category by rememberSaveable { mutableStateOf("其他") }
+    var categoryPage by rememberSaveable { mutableStateOf(false) }
+    var selectedAccountId by rememberSaveable { mutableStateOf(accounts.firstOrNull()?.id ?: 0L) }
     var accountMenu by remember { mutableStateOf(false) }
     val choices = accounts.ifEmpty { listOf(Account(0, "日常支付")) }
     val account = choices.find { it.id == selectedAccountId } ?: choices.first()
@@ -76,7 +77,7 @@ internal fun AddPage(accounts: List<Account>, customCategories: List<String>,
 @Composable
 internal fun CategoryPickerPage(selected: String, customCategories: List<String>, onSelect: (String) -> Unit,
                                 onUpdateCategories: (List<String>) -> Unit, onBack: () -> Unit) {
-    var newCategory by remember { mutableStateOf("") }
+    var newCategory by rememberSaveable { mutableStateOf("") }
     var categoryToDelete by remember { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
