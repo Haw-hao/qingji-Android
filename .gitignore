@@ -1,0 +1,17 @@
+.gradle/
+.kotlin/
+.idea/
+**/build/
+local.properties
+.local-tools/
+recovery/tools/
+recovery/decompiled/
+recovery/original/
+*.jks
+*.keystore
+
+# Local APK analysis intermediates
+recovery/apk-analysis/*.log
+recovery/apk-analysis/*.dex.classes.txt
+recovery/apk-analysis/*.dex.strings.txt
+recovery/apk-analysis/archive-files.json
