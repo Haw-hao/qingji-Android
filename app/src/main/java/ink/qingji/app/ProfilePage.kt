@@ -38,6 +38,7 @@ internal fun ProfilePage(accounts: List<Account>, txs: List<Transaction>, prefs:
                 Text("轻记默认将数据保存在本地设备，不上传消费记录、银行卡信息或通知内容。", fontSize = 13.sp)
             }
         }
+        BackupSettings(txs.size)
         Text("账户余额", fontWeight = FontWeight.Bold)
         accounts.forEach { account ->
             Card(colors = CardDefaults.cardColors(containerColor = Color.White)) {

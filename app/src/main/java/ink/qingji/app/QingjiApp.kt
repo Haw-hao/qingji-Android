@@ -10,12 +10,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import ink.qingji.app.data.*
+import ink.qingji.app.backup.LocalBackup
 import java.util.Locale
 
 // The original MainActivity.kt held these colors and all pages. Pages are split for readability.
@@ -29,13 +31,19 @@ internal fun money(value: Double): String = String.format(Locale.CHINA, "%.2f", 
 
 @Composable
 fun QingjiApp(db: TransactionDb, prefs: SharedPreferences) {
+    val backup = LocalBackup.get(LocalContext.current)
+    val backupState by backup.state.collectAsState()
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var txs by remember { mutableStateOf(db.list()) }
     var accounts by remember { mutableStateOf(db.accounts()) }
-    var categories by remember { mutableStateOf(prefs.getStringSet("custom_categories", emptySet()).orEmpty().toList()) }
+    var categories by remember { mutableStateOf(db.customCategories()) }
     var filter by rememberSaveable { mutableStateOf<String?>(null) }
     val lifecycleOwner = LocalLifecycleOwner.current
     fun refresh() { txs = db.list(); accounts = db.accounts() }
+    LaunchedEffect(backupState.restoreVersion) {
+        refresh()
+        categories = db.customCategories()
+    }
     DisposableEffect(lifecycleOwner, db) {
         val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_RESUME) refresh() }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -43,7 +51,7 @@ fun QingjiApp(db: TransactionDb, prefs: SharedPreferences) {
     }
     val updateCategories: (List<String>) -> Unit = { values ->
         categories = values.map { it.trim() }.filter { it.isNotBlank() && it !in BuiltInCategories }.distinct()
-        prefs.edit().putStringSet("custom_categories", categories.toSet()).apply()
+        db.updateCustomCategories(categories)
     }
     MaterialTheme(colorScheme = lightColorScheme(primary = Teal, background = Soft, surface = Color.White)) {
         Scaffold(containerColor = Soft, bottomBar = {
